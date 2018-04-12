@@ -16,3 +16,20 @@ python manager.py shell里面的增删数据：
      p = Post.objects.get(title='title test')
      p.delete()
 
+
+
+template 里的模板：
+    这里的 {% block main %}{% endblock main %} 是一个占位框，main 是我们给这个 block 取的名字。下面我们会看到 block 标签的作用。
+    同时我们也在 aside 标签下加了一个 {% block toc %}{% endblock toc %} 占位框，因为 detail.html 中 aside 标签下会多一个目录栏。
+    当 {% block toc %}{% endblock toc %} 中没有任何内容时，{% block toc %}{% endblock toc %} 在模板中不会显示。但当其中有内容是，
+    模板就会显示 block 中的内容。
+
+    新的index.html代码里面加入{% extends 'base.html' %}
+    这样 base.html 里的代码加上 {% block main %}{% endblock main %} 里的代码就和最开始 index.html 里的代码一样了。这就是模板继承
+    的作用，公共部分的代码放在 base.html 里，而其它页面不同的部分通过替换 {% block main %}{% endblock main %} 占位标签里的内容即可。
+    如果你对这种模板继承还是有点糊涂，可以把这种继承和 Python 中类的继承类比。base.html 就是父类，index.html 就是子类。index.html
+    继承了 base.html 中的全部内容，同时它自身还有一些内容，这些内容就通过 “覆写” {% block main %}{% endblock main %}（把 block
+    看做是父类的属性）的内容添加即可。
+    detail 页面处理起来就简单了，同样继承 base.html ，在 {% block main %}{% endblock main %} 里填充 detail.html 页面应该显示的
+    内容，以及在 {% block toc %}{% endblock toc %} 中填写 base.html 中没有的目录部分的内容。不过目前的目录只是占位数据，我们在以后
+    会实现如何从文章中自动摘取目录。
