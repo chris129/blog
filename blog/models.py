@@ -5,6 +5,8 @@ from django.db  import  models
 from django.contrib.auth.models import User
 
 
+#模型管理器 objects
+
 class Category(models.Model):
     """
     Django 要求模型必须继承 models.Model 类。
