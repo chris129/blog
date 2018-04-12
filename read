@@ -1,0 +1,18 @@
+python manager.py shell里面的增删数据：
+    写入数据：
+    c = Category(name='category test')
+    c.save()
+    查找数据：
+    c = Category.objects.get(name='category test')
+    model里面增加一个__str__方法让其默认返回一个数据：
+        def __str__(self):
+            return self.name
+    Category.objects.all()
+    修改数据：
+    c = Category.objects.get(name='category test')
+    c.name = 'category test new'
+    c.save()
+    删除数据-先查出来删除即可：
+     p = Post.objects.get(title='title test')
+     p.delete()
+
