@@ -82,6 +82,12 @@ class Post(models.Model):
         """
         return reverse('blog:detail',kwargs={'pk':self.pk})
 
+    class Meta:
+        # 在 models.Model 的子类里定义一个 Meta 的内部类，这个内部类通过指定一些属性来规定这个类该有的一些特性
+        #ordering 属性用来指定文章排序方式，['-created_time'] 指定了依据哪个属性的值进行排序,且负号表示逆序排列
+        ordering = ['-created_time']
+
+
 
 
 
