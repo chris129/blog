@@ -11,7 +11,7 @@ def index(request):
     )
 
 
-
+from comments.forms import CommentForm
 def detail(request,pk):
     """
     视图函数很简单，它根据我们从 URL 捕获的文章 id（也就是 pk，这里 pk 和 id 是等价的）获取数据库中文章 id 为该值的记录，然后传递给模板
@@ -32,7 +32,15 @@ def detail(request,pk):
                                      'markdown.extensions.codehilite',
                                      'markdown.extensions.toc',
                                   ])
-    return render(request, 'blog/detail.html', context={'post': post})
+    form = CommentForm()
+    #获取这篇文章下的全部评论
+    comment_list = post.comment_set.all()
+    #将文章、表单、以及文章下的评论列表作为模板变量传给 detail.html 模板，以便渲染相应数据
+    context = {'post':post,
+               'form':form,
+               'comment_list':comment_list
+               }
+    return render(request, 'blog/detail.html', context=context)
 
 
 """
