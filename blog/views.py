@@ -33,3 +33,31 @@ def detail(request,pk):
                                      'markdown.extensions.toc',
                                   ])
     return render(request, 'blog/detail.html', context={'post': post})
+
+
+"""
+模型管理器（objects）的 filter 函数来过滤文章。由于是按照日期归档，因此这里根据文章发表的年和月来过滤。具体来说，就是根据 created_time 
+的 year 和 month 属性过滤，筛选出文章发表在对应的 year 年和 month 月的文章。注意这里 created_time 是 Python 的 date 对象，
+其有一个 year 和 month 属性,Python 中类实例调用属性的方法通常是 created_time.year，但是由于这里作为函数的参数列表，所以 Django 
+要求我们把点替换成了两个下划线，即 created_time__year
+"""
+
+def archives(request,year,month):
+    post_list = Post.objects.filter(created_time__year=year,
+                                    created_time__month=month).order_by('-created_time')
+    return render(request,'blog/index.html',context={'post_list':post_list})
+
+
+
+"""分类页面：
+这里我们首先根据传入的 pk 值（也就是被访问的分类的 id 值）从数据库中获取到这个分类。get_object_or_404 函数和 detail 视图中一样，
+其作用是如果用户访问的分类不存在，则返回一个 404 错误页面以提示用户访问的资源不存在。然后我们通过 filter 函数过滤出了该分类下的全部文章。
+同样也和首页视图中一样对返回的文章列表进行了排序。
+"""
+from .admin import  Category
+
+def category(request,pk):
+    cate = get_object_or_404(Category,pk=pk)
+    post_list = Post.objects.filter(category=cate).order_by('-created_time')
+    return render(request,'blog/index.html',context={'post_list':post_list})
+

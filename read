@@ -34,6 +34,17 @@ template 里的模板：
     内容，以及在 {% block toc %}{% endblock toc %} 中填写 base.html 中没有的目录部分的内容。不过目前的目录只是占位数据，我们在以后
     会实现如何从文章中自动摘取目录。
 
+
+    <a href="{% url 'blog:archives' date.year date.month %}">
+    这里 {% url %} 这个模板标签的作用是解析视图函数 blog:archives 对应的 URL 模式，并把 URL 模式中的年和月替换成 date.year，
+    date.month 的值。例如 blog:archives 表示 blog 应用下的 archives 函数，这个函数对应的 URL 模式为
+     ^archives/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$，假设 date.year=2017，date.month=5，
+     那么 {% url 'blog:archives' date.year date.month %} 模板标签返回的值为/archives/2017/5/。
+    为什么要使用 {% url %} 模板标签呢？事实上，我们把超链接的 href 属性设置为 /archives/{{ date.year }}/{{ date.month }}/
+    同样可以达到目的，但是这种写法是硬编码的。虽然现在 blog:archives 视图函数对应的 URL 模式是这种形式，但是如果哪天这个模式改变了呢？
+    如果使用了硬编码的写法，那你需要把每一处 /archives/{{ date.year }}/{{ date.month }}/ 修改为新的模式。但如果使用了 {% url %}
+    模板标签，则不用做任何修改。测试一下，点击侧边栏归档的日期，跳转到归档页面，发现报了个错误，提示没有安装 pytz。激活虚拟环境，使用 pip install pytz 安装即可。
+
 markdown:pip install markdown
     将 Markdown 格式的文本渲染成 HTML 文本非常简单，只需调用这个库的 markdown 方法即可。我们书写的博客文章内容存在 Post 的 body 属性里
     # 一级标题

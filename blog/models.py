@@ -57,7 +57,7 @@ class Post(models.Model):
     https://docs.djangoproject.com/en/1.10/topics/db/models/#relationships
     """
 
-    catagory =models.ForeignKey(Category)
+    category =models.ForeignKey(Category)
     tags = models.ManyToManyField(Tag,blank=True)
     """
     文章作者，这里 User 是从 django.contrib.auth.models 导入的。
