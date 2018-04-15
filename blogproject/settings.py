@@ -25,7 +25,8 @@ SECRET_KEY = 'jimbgd&ak3bep!-%60j9ob)f6-@&+t848ucxa+ikwudduejxs8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS 是允许访问的域名列表
+ALLOWED_HOSTS = ['127.0.0.1'，'localhost'，'blog.coolinux.cn']
 
 
 # Application definition
@@ -133,4 +134,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+#STATIC_ROOT 指明了静态文件的收集目录
+STATIC_ROOT = os.path.join(BASE_DIR,'static')
 

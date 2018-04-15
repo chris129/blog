@@ -67,3 +67,117 @@ markdown:pip install markdown
     ​```
 
 markdown的代码高亮：pip install Pygments
+
+
+
+
+部署服务相关：
+    标准目录结构:
+        接下来需要把代码上传到服务器了。我服务器上存放代码的目录结构一般是这样的：
+            /home/chris/
+                sites/
+                    demo.coolinux.cn/
+                        env/
+                        django-blog-tutorial/
+        一台服务器可能部署多个网站，所有网站代码都放在 sites/ 目录下。demo.coolinux.cn/ 这个文件夹以网站的域名命名，便于区分。
+        env/ 是 python 虚拟环境目录。django-blog-tutorial/ 是 Django 博客项目目录
+
+
+        收集静态文件:
+            虚拟环境下继续运行 python manage.py collectstatic 命令收集静态文件到 static 目录下
+        生成数据库：
+            继续运行 python manage.py migrate 命令创建数据库文件
+        创建超级用户：
+            python manage.py createsuperuser 命令创建一个超级用户，方便我们进入 Django 管理后台
+
+        nginx配置：
+            server {
+            charset utf-8;
+            listen 80;
+            server_name demo.coolinux.cn; ①
+
+            location /static { ②
+                alias /home/chris/sites/demo.zmrenwu.com/django-blog-tutorial/static;
+            }
+
+            location / { ③
+                proxy_set_header Host $host;
+                #proxy_pass 后面使用了 unix 套接字，其作用是防止端口冲突
+                proxy_pass http://unix:/tmp/demo.chris.cn.socket;
+            }
+        }
+
+        使用Gunicorn管理进程：
+            Gunicorn 一般用来管理多个进程，有进程挂了Gunicorn 可以把它拉起来，防止服务器长时间停止服务，还可以动态调整 worker 的数量，
+            请求多的时候增加 worker 的数量，请求少的时候减少
+
+            启动进程：
+                安装pip install gunicorn
+                (env) chris@localhost:~/sites/demo.coolunix.cn/django-blog-tutorial$ pip install gunicorn
+                chris@...blog-tutorial$ gunicorn --bind unix:/tmp/demo.chris.cn.socket blogproject.wsgi:application
+
+        CND加速：项目使用了 Bootstrap 和 jQuery，这两个文件我们是从本地加载的。如果服务器性能比较差的话，加载需要耗费很长的时间，
+            网站打开的速度就变得无法忍受。我们使用 CDN 来加快加载速度
+
+            base.html：修改本地的css和js为cdn节点的文件即可
+            - <link rel="stylesheet" href="{% static 'blog/css/bootstrap.min.css' %}">
+            - <script src="{% static 'blog/js/jquery-2.1.3.min.js' %}"></script>
+            - <script src="{% static 'blog/js/bootstrap.min.js' %}"></script>
+            + <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+            + <script src="https://cdn.bootcss.com/jquery/2.1.3/jquery.min.js"></script>
+            + <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+使用febfic脚本自动化部署：
+    部署步骤：
+        远程连接服务器。
+        进入项目根目录，从远程仓库拉取最新的代码。
+        如果项目引入了新的依赖，需要执行 pip install -r requirement.txt 安装最新依赖。
+        如果修改或新增了项目静态文件，需要执行 python manage.py collectstatic 收集静态文件。
+        如果数据库发生了变化，需要执行 python manage.py migrate 迁移数据库。
+        重启 Nginx 和 Gunicorn 使改动生效。
+
+    代码如下：
+        blogproject/fabfile.py
+
+        from fabric.api import env, run
+        from fabric.operations import sudo
+
+        GIT_REPO = "you git repository" ①
+
+        env.user = 'you host username' ②
+        env.password = 'you host password'
+
+        # 填写你自己的主机对应的域名
+        env.hosts = ['demo.zmrenwu.com']
+
+        # 一般情况下为 22 端口，如果非 22 端口请查看你的主机服务提供商提供的信息
+        env.port = '22'
+
+
+        def deploy():
+            source_folder = '/home/yangxg/sites/zmrenwu.com/django-blog-tutorial' ③
+
+            run('cd %s && git pull' % source_folder) ④
+            run("""
+                cd {} &&
+                ../env/bin/pip install -r requirements.txt &&
+                ../env/bin/python3 manage.py collectstatic --noinput &&
+                ../env/bin/python3 manage.py migrate
+                """.format(source_folder)) ⑤
+            sudo('restart gunicorn-demo.zmrenwu.com') ⑥
+            sudo('service nginx reload')
+        说明：
+            ① 你的代码托管仓库地址。
+            ② 配置一些服务器的地址信息和账户信息，各参数的含义分别为：
+            env.user：用于登录服务器的用户名
+            env.password：用户名对应的密码
+            env.hosts：服务器的 IP 地址，也可以是解析到这个 IP 的域名
+            env.port：SSH 远程服务器的端口号
+            ③ 需要部署的项目根目录在服务器上的位置。
+            ④ 通过 run 方法在服务器上执行命令，传入的参数为需要执行的命令，用字符串包裹。这里执行了两条命令，不同命令间用 && 符号连接：
+            cd 命令进入到需要部署的项目根目录
+            git pull 拉取远程仓库的最新代码
+            ⑤ 对应上述部署过程中 3-5 的几条命令。因为启用了虚拟环境，所以运行的是虚拟环境 ../env/bin/ 下的 pip 和 python
+            ⑥ 重启 Gunicorn 和 Nginx，由于这两条命令要在超级权限下运行，所以使用了 sudo 方法而不是 run 方法。
+        本地执行：
+            fab deploy
