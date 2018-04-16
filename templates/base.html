@@ -1,6 +1,6 @@
 {% load staticfiles %}
 
-{#导入自定义的template#}
+<!--导入自定义的template-->
 {% load blog_tags %}
 <!DOCTYPE html>
 <html>
@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{% static 'blog/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'blog/css/pace.css' %}">
     <link rel="stylesheet" href="{% static 'blog/css/custom.css' %}">
-{#    增加高亮显示样式如下#}
+    <!--增加高亮显示样式如下-->
     <link rel="stylesheet" href="{% static 'blog/css/highlights/github.css' %}">
 
     <!-- js -->
@@ -31,7 +31,7 @@
         <div class="row">
             <div class="col-md-4 col-sm-5 col-xs-8">
                 <div class="logo">
-{#                    导航栏有一个 Black & White 的 Logo，我们希望点击它就能回到首页面，只修修改一下超链接即可#}
+                    <!--导航栏有一个 Black & White 的 Logo，我们希望点击它就能回到首页面，只修修改一下超链接即可-->
                     <h1><a href="{% url 'blog:index' %}"><b>Black</b> &amp; White</a></h1>
                 </div>
             </div><!-- col-md-4 -->
@@ -80,7 +80,7 @@
                 {% endblock toc %}
                 <div class="widget widget-recent-posts">
                     <h3 class="widget-title">最新文章</h3>
-{#                    使用get_recent_posts模板获取最新文章，并保持到列表recent_post_list内，然后使用for循环#}
+                    <!--使用get_recent_posts模板获取最新文章，并保持到列表recent_post_list内，然后使用for循环-->
                     {% get_recent_posts as recent_post_list %}
                     <ul>
                         {% for post in recent_post_list %}
@@ -98,10 +98,14 @@
                     <ul>
                         {% for date in date_list %}
                         <li>
-{#  日期列表中的元素为 Python 的 date 对象，因此可以通过其 year 和 month 属性分别获取年和月的信息#}
-{#  {% url %} 这个模板标签的作用是解析视图函数 blog:archives 对应的 URL 模式，并把 URL 模式中的年和月替换成 date.year，date.month 的值#}
-{#  例如 blog:archives 表示 blog 应用下的 archives 函数，这个函数对应的 URL 模式为 ^archives/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$， #}
-{#  假设 date.year=2017，date.month=5，那么 {% url 'blog:archives' date.year date.month %} 模板标签返回的值为/archives/2017/5/#}
+                            <!--日期列表中的元素为 Python 的 date 对象，因此可以通过其 year 和 month 属性分别获取年和月的信息
+                            {#{% url %} 这个模板标签的作用是解析视图函数 blog:archives 对应的 URL 模式，并把 URL 模式中的年和月替换成#}
+                            date.year，date.month 的值
+                            例如 blog:archives 表示 blog 应用下的 archives 函数，这个函数对应的 URL 模式为
+                            ^archives/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$
+                            假设 date.year=2017，date.month=5，那么 {% url 'blog:archives' date.year date.month %}
+                            模板标签返回的值为/archives/2017/5/
+                            -->
                             <a href="{% url 'blog:archives' date.year date.month %}">{{ date.year }} 年 {{ date.month }} 月</a>
                         </li>
                         {% empty %}

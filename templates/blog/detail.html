@@ -15,15 +15,16 @@
             </div>
         </header>
         <div class="entry-content clearfix">
-{#            解除转义#}
+            <!--解除转义-->
             {{ post.body|safe }}
         </div>
     </article>
     <section class="comment-area" id="comment-area">
         <hr>
         <h3>发表评论</h3>
-{#        {{ form.name.errors }}、{{ form.email.errors }} 等将渲染表单对应字段的错误（如果有的话），例如用户 email 格式填错了，#}
-{#        那么 Django 会检查用户提交的 email 的格式，然后将格式错误信息保存到 errors 中，模板便将错误信息渲染显示#}
+        <!-- {{ form.name.errors }}、{{ form.email.errors }} 等将渲染表单对应字段的错误（如果有的话），例如用户 email 格式填错了，
+        那么 Django 会检查用户提交的 email 的格式，然后将格式错误信息保存到 errors 中，模板便将错误信息渲染显示
+        -->
         <form action="{% url 'comments:post_comment' post.pk %}" method="post" class="comment-form" >
             {% csrf_token %}
             <div class="row">
