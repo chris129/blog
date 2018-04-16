@@ -87,6 +87,14 @@ class Post(models.Model):
         #ordering 属性用来指定文章排序方式，['-created_time'] 指定了依据哪个属性的值进行排序,且负号表示逆序排列
         ordering = ['-created_time']
 
+    #新增一个阅读量字段, PositiveIntegerField，该类型的值只允许为正整数或 0
+    views = models.PositiveIntegerField(default=0)
+    #首先将自身对应的 views 字段的值 +1（此时数据库中的值还没变），然后调用 save 方法将更改后的值保存到数据库。
+    # 注意这里使用了update_fields 参数来告诉 Django 只更新数据库中 views 字段的值，以提高效率。
+    def increase_views(self):
+        self.views += 1
+        self.save(update_fields=['views'])
+
 
 
 

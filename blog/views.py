@@ -19,6 +19,8 @@ def detail(request,pk):
     就返回对应的 post，如果不存在，就给用户返回一个 404 错误，表明用户请求的文章不存在。
     """
     post = get_object_or_404(Post,pk=pk)
+    #阅读量+1
+    post.increase_views()
     """
     这样我们在模板中展示 {{ post.body }} 的时候，就不再是原始的 Markdown 文本了，而是渲染过后的 HTML 文本。注意这里我们给 markdown 
     渲染函数传递了额外的参数 extensions，它是对 Markdown 语法的拓展，这里我们使用了三个拓展，分别是 extra、codehilite、toc。extra 

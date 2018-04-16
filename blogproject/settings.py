@@ -26,7 +26,7 @@ SECRET_KEY = 'jimbgd&ak3bep!-%60j9ob)f6-@&+t848ucxa+ikwudduejxs8'
 DEBUG = True
 
 #ALLOWED_HOSTS 是允许访问的域名列表
-ALLOWED_HOSTS = ['127.0.0.1'，'localhost'，'blog.coolinux.cn']
+ALLOWED_HOSTS = ['127.0.0.1','localhost','blog.coolinux.cn']
 
 
 # Application definition
