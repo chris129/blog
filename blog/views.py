@@ -3,12 +3,33 @@
 from django.shortcuts import render,get_object_or_404
 from .models import Post
 import  markdown
+from django.views.generic import ListView,DetailView
 
-def index(request):
-    #注意此post_list后面千万不能参数，不然类型就从QuerySet变成了tunple
-    post_list = Post.objects.all().order_by('-created_time')
-    return render(request,'blog/index.html',context={'post_list':post_list}
-    )
+
+
+
+"""
+将index改写成类视图
+一个类视图，首先需要继承 Django 提供的某个类视图。至于继承哪个类视图，需要根据你的视图功能而定。比如这里 IndexView 的功能是从数据库中获
+取文章（Post）列表，ListView 就是从数据库中获取某个模型列表数据的，所以 IndexView 继承 ListView
+model。将 model 指定为 Post，告诉 Django 我要获取的模型是 Post。
+template_name。指定这个视图渲染的模板。
+context_object_name。指定获取的模型列表数据保存的变量名。这个变量会被传递给模板
+"""
+class IndexView(ListView):
+    model = Post
+    template_name = 'blog/index.html'
+    context_object_name = 'post_list'
+
+
+
+
+# def index(request):
+#     #注意此post_list后面千万不能参数，不然类型就从QuerySet变成了tunple
+#     post_list = Post.objects.all().order_by('-created_time')
+#     return render(request,'blog/index.html',context={'post_list':post_list}
+#     )
+
 
 
 from comments.forms import CommentForm
@@ -44,6 +65,62 @@ def detail(request,pk):
                }
     return render(request, 'blog/detail.html', context=context)
 
+#使用类重写detail，除了从数据库中获取模型列表的数据外，从数据库获取模型的一条记录数据也是常见的需求，使用DetailView
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blog/detail.html'
+    context_object_name = 'post'
+
+    def get(self,request,*args,**kwargs):
+        """
+        覆写 get 方法的目的是因为每当文章被访问一次，就得将文章阅读量 +1
+        get 方法返回的是一个 HttpResponse 实例
+        之所以需要先调用父类的 get 方法，是因为只有当 get 方法被调用后，
+        才有 self.object 属性，其值为 Post 模型实例，即被访问的文章 post
+        """
+        response = super(PostDetailView,self).get(request,*args,**kwargs)
+        #将阅读量+1，self.object 的值就是被访问的文章 post
+        self.object.increase_views()
+        # 视图必须返回一个 HttpResponse 对象
+        return response
+
+    def get_object(self, queryset=None):
+        # 覆写 get_object 方法的目的是因为需要对 post 的 body 值进行渲染
+        post = super(PostDetailView,self).get_object(queryset=None)
+        post.body = markdown.markdown(post.body,
+                                      extensions=[
+                                         'markdown.extensions.extra',
+                                         'markdown.extensions.codehilite',
+                                         'markdown.extensions.toc',
+                                      ])
+        return post
+
+    def get_context_data(self, **kwargs):
+        #覆写 get_context_data 的目的是因为除了将 post 传递给模板外（DetailView 已经帮我们完成）
+        # 还要把评论表单、post 下的评论列表传递给模板
+        context = super(PostDetailView,self).get_context_data(**kwargs)
+        form = CommentForm()
+        comment_list = self.object.comment_set.all()
+        context.update({
+            'form': form,
+            'comment_list': comment_list
+        })
+        return context
+"""
+PostDetailView 稍微复杂一点，主要是等价的 detail 视图函数本来就比较复杂，下面来一步步对照 detail 视图函数中的代码讲解。
+首先我们为 PostDetailView 类指定了一些属性的值，这些属性的含义和 ListView 中是一样的，这里不再重复讲解。
+紧接着我们覆写了 get 方法。这对应着 detail 视图函数中将 post 的阅读量 +1 的那部分代码。事实上，你可以简单地把 get 方法的调用看成是 
+detail 视图函数的调用。
+接着我们又复写了 get_object 方法。这对应着 detail 视图函数中根据文章的 id（也就是 pk）获取文章，然后对文章的 post.body 进行 
+Markdown 渲染的代码部分。
+最后我们复写了 get_context_data 方法。这部分对应着 detail 视图函数中生成评论表单、获取 post 下的评论列表的代码部分。
+这个方法返回的值是一个字典，这个字典就是模板变量字典，最终会被传递给模板。
+你也许会被这么多方法搞乱，为了便于理解，你可以简单地把 get 方法看成是 detail 视图函数，至于其它的像 get_object、get_context_data 
+都是辅助方法，这些方法最终在 get 方法中被调用，这里你没有看到被调用的原因是它们隐含在了 super(PostDetailView, self).get(request,
+ *args, **kwargs) 即父类 get 方法的调用中。最终传递给浏览器的 HTTP 响应就是 get 方法返回的 HttpResponse 对象。
+"""
+
 
 """
 模型管理器（objects）的 filter 函数来过滤文章。由于是按照日期归档，因此这里根据文章发表的年和月来过滤。具体来说，就是根据 created_time 
@@ -57,6 +134,18 @@ def archives(request,year,month):
                                     created_time__month=month).order_by('-created_time')
     return render(request,'blog/index.html',context={'post_list':post_list})
 
+#使用类重新archives
+class ArchivesView(ListView):
+    model = Post
+    template_name = 'blog/index.html'
+    context_object_name = 'post_list'
+
+    def get_queryset(self):
+        year = self.kwargs.get('year')
+        month = self.kwargs.get('month')
+        return super(ArchivesView, self).get_queryset().filter(created_time__year=year,
+                                                               created_time__month=month
+                                                               )
 
 
 """分类页面：
@@ -66,8 +155,24 @@ def archives(request,year,month):
 """
 from .admin import  Category
 
-def category(request,pk):
-    cate = get_object_or_404(Category,pk=pk)
-    post_list = Post.objects.filter(category=cate).order_by('-created_time')
-    return render(request,'blog/index.html',context={'post_list':post_list})
+# def category(request,pk):
+#     cate = get_object_or_404(Category,pk=pk)
+#     post_list = Post.objects.filter(category=cate).order_by('-created_time')
+#     return render(request,'blog/index.html',context={'post_list':post_list})
 
+
+"""
+改写category为类视图
+覆写了父类的 get_queryset 方法。该方法默认获取指定模型的全部列表数据。为了获取指定分类下的文章列表数据，我们覆写该方法，改变它的默认行为
+在类视图中，从 URL 捕获的命名组参数值保存在实例的 kwargs 属性（是一个字典）里，非命名组参数值保存在实例的 args 属性（是一个列表）里
+我们使了 self.kwargs.get('pk') 来获取从 URL 捕获的分类 id 值
+调用父类的 get_queryset 方法获得全部文章列表，紧接着就对返回的结果调用了 filter 方法来筛选该分类下的全部文章并返回
+"""
+class CategoryView(ListView):
+    model = Post
+    template_name = 'blog/index.html'
+    context_object_name = 'post_list'
+
+    def get_queryset(self):
+        cate = get_object_or_404(Category,pk=self.kwargs.get('pk'))
+        return super(CategoryView,self).get_queryset().filter(category=cate)
