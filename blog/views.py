@@ -20,6 +20,38 @@ class IndexView(ListView):
     model = Post
     template_name = 'blog/index.html'
     context_object_name = 'post_list'
+    # 而类视图 ListView 已经帮我们写好了上述的分页逻辑，我们只需通过指定 paginate_by 属性来开启分页功能，其值代表每一页包含多少篇文章,这里设置每 2 篇文章一页
+    paginate_by = 2
+    """
+    然后在模板中设置分页导航，比如上一页、下一页的按钮，以及显示一些页面信息。我们这里设置和 Django 官方博客那样的分页导航样式（
+    具体的样式见上图）。ListView 传递了以下和分页有关的模板变量供我们在模板中使用
+    paginator ，即Paginator 的实例。
+    page_obj ，当前请求页面分页对象。
+    is_paginated，是否已分页。只有当分页后页面超过两页时才算已分页。
+    object_list，请求页面的对象列表，和 post_list 等价。所以在模板中循环文章列表时可以选 post_list ，也可以选 object_list
+    """
+    """
+    官方分页例子：
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from django.shortcuts import render
+    
+    def listing(request):
+        contact_list = Contacts.objects.all()
+        paginator = Paginator(contact_list, 25) # 每页显示 25 个联系人
+    
+        page = request.GET.get('page')
+        try:
+            contacts = paginator.page(page)
+        except PageNotAnInteger:
+            # 如果用户请求的页码号不是整数，显示第一页
+            contacts = paginator.page(1)
+        except EmptyPage:
+            # 如果用户请求的页码号超过了最大页码号，显示最后一页
+            contacts = paginator.page(paginator.num_pages)
+    
+        return render(request, 'list.html', {'contacts': contacts})
+        
+    """
 
 
 

@@ -181,3 +181,41 @@ markdown的代码高亮：pip install Pygments
             ⑥ 重启 Gunicorn 和 Nginx，由于这两条命令要在超级权限下运行，所以使用了 sudo 方法而不是 run 方法。
         本地执行：
             fab deploy
+
+分页：
+    当博客上发布的文章越来越多时，通常需要进行分页显示，以免所有的文章都堆积在一个页面，影响用户体验。Django 内置的 Pagination
+    能够帮助我们实现简单的分页功能
+    from django.core.paginator import Paginator
+    对 item_list 进行分页，每页包含 2 个数据
+    item_list = ['john', 'paul', 'george', 'ringo']
+    p = Paginator(item_list, 2)
+    取特定页的数据：
+    # 取第 2 页的数据
+    >>> page2 = p.page(2)
+    >>> page2.object_list
+    查询特定页的当前页码数：
+    >>> page2.number
+    查看分页后的总页数：
+    >>> p.num_pages
+    查看某一页是否还有上一页，以及查询该页上一页的页码：
+    # 查询第二页是否还有上一页
+    >>> page2.has_previous()
+    True
+    # 查询第二页上一页的页码
+    >>> page2.previous_page_number()
+    1
+    查看某一页是否还有下一页，以及查询该页下一页的页码：
+    # 查询第二页是否还有下一页
+    >>> page2.has_next()
+    False
+    # 查询第二页下一页的页码
+    >>> page2.next_page_number()
+    django.core.paginator.EmptyPage: That page contains no results
+
+    另外一种分页方式：类视图
+    视图函数转换成了类视图。而类视图 ListView 已经帮我们写好了上述的分页逻辑，我们只需通过指定 paginate_by 属性来开启分页功能即可，
+    即在类视图中指定 paginate_by 属性的值
+
+
+
+
