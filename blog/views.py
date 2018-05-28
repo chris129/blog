@@ -90,10 +90,10 @@ class IndexView(ListView):
         is_paginated=context.get('is_paginated')
 
         # 调用自己写的 pagination_data 方法获得显示分页导航条需要的数据，见下方。
-        paginator_date=self.paginator_data(paginator,page,is_paginated)
+        #paginator_date=self.paginator_data(paginator,page,is_paginated)
 
         # 将分页导航条的模板变量更新到 context 中，注意 pagination_data 方法返回的也是一个字典。
-        context.update(paginator_date)
+        #context.update(paginator_date)
         # 将更新后的 context 返回，以便 ListView 使用这个字典中的模板变量去渲染模板。
         # 注意此时 context 字典中已有了显示分页导航条所需的数据。
         return context
