@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.shortcuts import render,get_object_or_404
-from .models import Post
+from .models import Post,Category
 import  markdown
 from django.views.generic import ListView,DetailView
 
