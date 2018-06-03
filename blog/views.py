@@ -9,6 +9,11 @@ from django.views.generic import ListView,DetailView
 
 
 """
+def index(request):
+     #注意此post_list后面千万不能逗号，不然类型就从QuerySet变成了tunple
+     post_list = Post.objects.all().order_by('-created_time')
+     return render(request,'blog/index.html',context={'post_list':post_list}
+     )
 将index改写成类视图
 一个类视图，首先需要继承 Django 提供的某个类视图。至于继承哪个类视图，需要根据你的视图功能而定。比如这里 IndexView 的功能是从数据库中获
 取文章（Post）列表，ListView 就是从数据库中获取某个模型列表数据的，所以 IndexView 继承 ListView
@@ -20,7 +25,8 @@ class IndexView(ListView):
     model = Post
     template_name = 'blog/index.html'
     context_object_name = 'post_list'
-    # 而类视图 ListView 已经帮我们写好了上述的分页逻辑，我们只需通过指定 paginate_by 属性来开启分页功能，其值代表每一页包含多少篇文章,这里设置每 2 篇文章一页
+    # index 视图函数首先通过 Post.objects.all() 从数据库中获取文章（Post）列表数据，并将其保存到 post_list 变量中,而类视图 ListView
+    # 已经帮我们写好了上述的分页逻辑，我们只需通过指定 paginate_by 属性来开启分页功能，其值代表每一页包含多少篇文章,这里设置每 2 篇文章一页
     paginate_by = 2
     """
     然后在模板中设置分页导航，比如上一页、下一页的按钮，以及显示一些页面信息。我们这里设置和 Django 官方博客那样的分页导航样式（
@@ -53,11 +59,7 @@ class IndexView(ListView):
         
     """
 
-# def index(request):
-#     #注意此post_list后面千万不能逗号，不然类型就从QuerySet变成了tunple
-#     post_list = Post.objects.all().order_by('-created_time')
-#     return render(request,'blog/index.html',context={'post_list':post_list}
-#     )
+
     """导航条设置：细化导航条，要求如下
     先来分析一下导航条的组成部分，可以看到整个分页导航条其实可以分成 七个部分：
     第 1 页页码，这一页需要始终显示。
