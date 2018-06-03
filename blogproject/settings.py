@@ -137,3 +137,6 @@ STATIC_URL = '/static/'
 #STATIC_ROOT 指明了静态文件的收集目录
 STATIC_ROOT = os.path.join(BASE_DIR,'static')
 
+###关闭debug和设置主机
+#DEBUG = False
+#ALLOWED_HOSTS = ['127.0.0.1', 'localhost ', 'blog.coolinux.com']
