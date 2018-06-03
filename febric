@@ -1,0 +1,10 @@
+1、Fabric 目前仅支持 Python2:pip install fabric
+2、部署过程回顾
+    在写 Fabric 脚本之前，我们先来回顾一下当我们在本地开发环境下更新了代码后，在服务器上的整个部署过程。
+    远程连接服务器。
+    进入项目根目录，从远程仓库拉取最新的代码。
+    如果项目引入了新的依赖，需要执行 pip install -r requirement.txt 安装最新依赖。
+    如果修改或新增了项目静态文件，需要执行 python manage.py collectstatic 收集静态文件。
+    如果数据库发生了变化，需要执行 python manage.py migrate 迁移数据库。
+    重启 Nginx 和 Gunicorn 使改动生效。
+    整个过程就是这样，把每一步操作翻译成 Fabric 对应的脚本代码，这样一个自动化部署脚本就完成了。
