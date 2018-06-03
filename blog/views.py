@@ -27,6 +27,7 @@ class IndexView(ListView):
     context_object_name = 'post_list'
     # index 视图函数首先通过 Post.objects.all() 从数据库中获取文章（Post）列表数据，并将其保存到 post_list 变量中,而类视图 ListView
     # 已经帮我们写好了上述的分页逻辑，我们只需通过指定 paginate_by 属性来开启分页功能，其值代表每一页包含多少篇文章,这里设置每 2 篇文章一页
+    # 分页
     paginate_by = 2
     """
     然后在模板中设置分页导航，比如上一页、下一页的按钮，以及显示一些页面信息。我们这里设置和 Django 官方博客那样的分页导航样式（

@@ -216,6 +216,25 @@ markdown的代码高亮：pip install Pygments
     视图函数转换成了类视图。而类视图 ListView 已经帮我们写好了上述的分页逻辑，我们只需通过指定 paginate_by 属性来开启分页功能即可，
     即在类视图中指定 paginate_by 属性的值
 
+    django官方例子：
+        from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+        from django.shortcuts import render
+
+        def listing(request):
+            contact_list = Contacts.objects.all()
+            paginator = Paginator(contact_list, 25) # 每页显示 25 个联系人
+
+            page = request.GET.get('page')
+            try:
+                contacts = paginator.page(page)
+            except PageNotAnInteger:
+                # 如果用户请求的页码号不是整数，显示第一页
+                contacts = paginator.page(1)
+            except EmptyPage:
+                # 如果用户请求的页码号超过了最大页码号，显示最后一页
+                contacts = paginator.page(paginator.num_pages)
+
+            return render(request, 'list.html', {'contacts': contacts})
 
 
 
