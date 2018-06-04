@@ -3,6 +3,8 @@
 #定义好函数后，要按照 Django 的规定注册这个函数为模板标签
 
 from ..models import Post,Category
+from django.db.models.aggregates import Count
+
 
 """
 这里我们首先导入 template 这个模块，然后实例化了一个 template.Library 类，并将函数 get_recent_posts 装饰为 register.simple_tag。
@@ -31,10 +33,25 @@ def archives():
 
 @register.simple_tag
 def get_category():
-    return Category.objects.all()
+    #return Category.objects.all()
+    ##在我们的博客侧边栏有分类列表，显示博客已有的全部文章分类。现在想在分类名后显示该分类下有多少篇文章，该怎么做呢？
+    # 最优雅的方式就是使用 Django 模型管理器的 annotate 方法,记得在顶部引入 count 函数
+    # Count 计算分类下的文章数，其接受的参数为需要计数的模型的名称
+    return Category.objects.annotate(num_posts=Count('post')).filter(num_posts__gt=0)
+    #这个 Category.objects.annotate 方法和 Category.objects.all 有点类似，它会返回数据库中全部 Category 的记录，
+    # 但同时它还会做一些额外的事情，在这里我们希望它做的额外事情就是去统计返回的 Category 记录的集合中每条记录下的文章数
 
 
 
+
+
+#此外，annotate 方法不局限于用于本文提到的统计分类下的文章数，你也可以举一反三，只要是两个 model 类通过 ForeignKey 或者 ManyToMany
+#关联起来，那么就可以使用 annotate 方法来统计数量。比如下面这样一个标签系统
+
+#统计标签下的文章数
+from blog.models import Tag
+# Count 计算分类下的文章数，其接受的参数为需要计数的模型的名称
+tag_list = Tag.objects.annotate(num_posts=Count('post'))
 
 
 
