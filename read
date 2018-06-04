@@ -238,3 +238,20 @@ markdown的代码高亮：pip install Pygments
 
 
 
+
+全文搜索：
+    博客文章通常包含标题和正文两个部分。当用户输入某个关键词进行搜索后，我们希望为用户显示标题和正文中含有被搜索关键词的全部文章。整个搜索的过程如下：
+    用户在搜素框中输入搜索关键词，假设为 “django”，然后用户点击了搜索按钮提交其输入的结果到服务器。
+    服务器接收到用户输入的搜索关键词 “django” 后去数据库查找文章标题和正文中含有该关键词的全部文章。
+    服务器将查询结果返回给用户。
+    整个过程就是这样，下面来看看 Django 如何用实现这些过程
+
+    先看到第 1 步，用户在搜索框输入搜索关键词，因此我们要在博客上为用户提供一个搜索表单，HTML 表单代码大概像这样
+    base.html
+
+    <form role="search" method="get" id="searchform" action="{% url 'blog:search' %}">
+      <input type="search" name="q" placeholder="搜索" required>
+      <button type="submit"><span class="ion-ios-search-strong"></span></button>
+    </form>
+    用户输入了搜索关键词并点击了搜索按钮后，数据就被发送给了 Django 后台服务器。表单的 action 属性的值为 {% url 'blog:search' %}
+    （虽然我们还没有写这个视图函数），表明用户提交的结果将被发送给 blog 应用下 search 视图函数对应的 URL。

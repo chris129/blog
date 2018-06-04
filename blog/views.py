@@ -399,3 +399,32 @@ class TagView(ListView):
         return super(TagView, self).get_queryset().filter(tags=tag)
 
 
+
+
+#查找含有搜索关键词的文章
+#搜索的功能将由 search 视图函数提供，代码写在 blog/views.py 里
+from django.db.models import Q
+
+def search(request):
+    q = request.GET.get('q')
+    error_msg = ''
+
+    if not q:
+        error_msg = "请输入关键字"
+        return render(request,'blog/index.html',{'error_msg':error_msg})
+
+    post_list = Post.objects.filter(Q(title__icontains=q) | Q(body__contains=q))
+    return render(request,'blog/index.html',{'error_msg':error_msg,'post_list':post_list})
+    # 首先我们使用 request.GET.get('q') 获取到用户提交的搜索关键词。用户通过表单 get 方法提交的数据 Django 为我们保存在 request.GET
+    # 里，这是一个类似于 Python 字典的对象，所以我们使用 get 方法从字典里取出键 q 对应的值，即用户的搜索关键词。这里字典的键之所以叫 q
+    # 是因为我们的表单中搜索框 input 的 name 属性的值是 q，如果修改了 name 属性的值，那么这个键的名称也要相应修改
+
+    # 如果用户没有输入搜索关键词而提交了表单，我们就无需执行查询，我们就在模板中渲染一个错误提示信息。
+    # 如果用户输入了搜索关键词，我们就通过 filter 方法从数据库里过滤出符合条件的所有文章。这里的过滤条件是 title__icontains=q，即 title
+    # 中包含（contains）关键字 q，前缀 i 表示不区分大小写。这里 icontains 是查询表达式（Field lookups），我们在之前也使用过其他类似的
+    # 查询表达式，其用法是在模型需要筛选的属性后面跟上两个下划线。Django 内置了很多查询表达式，建议过一遍 Django 官方留个印象，了解每个
+    # 表达式的作用，以后碰到相关的需求就可以快速定位到文档查询其用途 Field lookups。
+    # 此外我们这里从 from django.db.models 中引入了一个新的东西：Q 对象。Q 对象用于包装查询表达式，其作用是为了提供复杂的查询逻辑。例如这里
+    # Q(title__icontains=q) | Q(body__icontains=q) 表示标题（title）含有关键词 q 或者正文（body）含有关键词 q ，或逻辑使用 | 符号。
+    # 如果不用 Q 对象，就只能写成 title__icontains=q, body__icontains=q，这就变成标题（title）含有关键词 q 且正文（body）含有关键词
+    # q，就达不到我们想要的目的。
