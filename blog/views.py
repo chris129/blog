@@ -8,6 +8,7 @@ from django.views.generic import ListView,DetailView
 
 
 
+
 """
 def index(request):
      #注意此post_list后面千万不能逗号，不然类型就从QuerySet变成了tunple
@@ -241,7 +242,14 @@ def detail(request,pk):
                }
     return render(request, 'blog/detail.html', context=context)
 
+
+
+
 #使用类重写detail，除了从数据库中获取模型列表的数据外，从数据库获取模型的一条记录数据也是常见的需求，使用DetailView
+
+
+from django.utils.text import slugify
+from markdown.extensions.toc import TocExtension
 
 class PostDetailView(DetailView):
     model = Post
@@ -263,13 +271,35 @@ class PostDetailView(DetailView):
 
     def get_object(self, queryset=None):
         # 覆写 get_object 方法的目的是因为需要对 post 的 body 值进行渲染
-        post = super(PostDetailView,self).get_object(queryset=None)
-        post.body = markdown.markdown(post.body,
-                                      extensions=[
-                                         'markdown.extensions.extra',
-                                         'markdown.extensions.codehilite',
-                                         'markdown.extensions.toc',
-                                      ])
+        # 看到 get_object 方法中的代码，markdown.markdown() 方法把 post.body 中的 Markdown 文本渲染成了 HTML 文本。
+        # 同时我们还给该方法提供了一个 extensions 的额外参数。其中 markdown.extensions.codehilite 是代码高亮拓展，
+        # 而 markdown.extensions.toc 就是自动生成目录的拓展
+        #在渲染 Markdown 文本时加入了 toc 拓展后，就可以在文中插入目录了。方法是在书写 Markdown 文本时，
+        # 在你想生成目录的地方插入 [TOC] 标记即可,上述方式的一个局限局限性就是只能通过 [TOC] 标记在文章内容中插入目录
+
+
+        # post.body = markdown.markdown(post.body,
+        #                               extensions=[
+        #                                  'markdown.extensions.extra',
+        #                                  'markdown.extensions.codehilite',
+        #                                  'markdown.extensions.toc',
+        #                               ])
+
+        #重写md，在页面的其它地方，只需要稍微改动一下渲染 Markdown 文本内容的方式即可
+        md = markdown.Markdown(extensions=[
+            'markdown.extensions.extra',
+            'markdown.extensions.codehilite',
+            #'markdown.extensions.toc',
+            # 文章内容的标题被设置了锚点http://127.0.0.1:8000/post/3/#_1，#_1 就是锚点，Markdown 在设置锚点时利用的是标题的值
+            # 由于通常我们的标题都是中文，Markdown 没法处理，所以它就忽略的标题的值，而是简单地在后面加了个 _1 这样的锚点值。为了解决这一个问题，
+            # 我们需要修改一下传给 extentions 的参数
+            TocExtension(slugify=slugify),
+            #和之前不同的是，extensions 中的 toc 拓展不再是字符串 markdown.extensions.toc ，而是 TocExtension 的实例。
+            # TocExtension 在实例化时其 slugify 参数可以接受一个函数作为参数，这个函数将被用于处理标题的锚点值
+        ])
+        post = super(PostDetailView, self).get_object(queryset=None)
+        post.body = md.convert(post.body)
+        post.toc = md.toc
         return post
 
     def get_context_data(self, **kwargs):
