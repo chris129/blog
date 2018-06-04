@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url,include
 from django.contrib import admin
+from blog.feeds import AllPostsRessFeed
 
 """
 我们这里导入了一个 include 函数，然后利用这个函数把 blog 应用下的 urls.py 文件包含了进来。此外 include 前还有一个 r''，这是一个空字符串。
@@ -25,4 +26,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'',include('blog.urls')),
     url(r'',include('comments.urls')),
+    url(r'^all/rss/$',AllPostsRessFeed(),name="rss"),
+
 ]
