@@ -255,3 +255,61 @@ markdown的代码高亮：pip install Pygments
     </form>
     用户输入了搜索关键词并点击了搜索按钮后，数据就被发送给了 Django 后台服务器。表单的 action 属性的值为 {% url 'blog:search' %}
     （虽然我们还没有写这个视图函数），表明用户提交的结果将被发送给 blog 应用下 search 视图函数对应的 URL。
+
+
+
+
+Django Haystack 全文检索与关键词高亮:
+    在此之前我们使用了 Django 内置的一些方法实现了一个简单的搜索功能。但这个搜索功能实在过于简单，没有多大的实用性。对于一个搜索引擎来说，
+    至少应该能够根据用户的搜索关键词对搜索结果进行排序以及高亮关键字。现在我们就来使用 django-haystack 实现这些特性
+    django-haystack 是一个专门提供搜索功能的 django 第三方应用，它支持 Solr、Elasticsearch、Whoosh、Xapian 等多种搜索引擎，
+    配合著名的中文自然语言处理库 jieba 分词，就可以为我们的博客提供一个效s果不错的博客文章搜索系统。
+    pip install whoosh django-haystack jieba
+    配置 Haystack
+        安装好 django haystack 后需要在项目的 settings.py 做一些简单的配置。
+        首先是把 django haystack 加入到 INSTALLED_APPS 选项里：
+        blogproject/settings.py
+        INSTALLED_APPS = [
+            'django.contrib.admin',
+            # 其它 app...
+            'haystack',
+            'blog',
+            'comments',
+        ]
+    然后加入如下配置项:
+        blogproject/settings.py
+
+        HAYSTACK_CONNECTIONS = {
+            'default': {
+                'ENGINE': 'blog.whoosh_cn_backend.WhooshEngine',
+                'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+            },
+        }
+        HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
+        HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+        HAYSTACK_CONNECTIONS 的 ENGINE 指定了 django haystack 使用的搜索引擎，这里我们使用了 blog.whoosh_cn_backend.WhooshEngine，
+        虽然目前这个引擎还不存在，但我们接下来会创建它。PATH 指定了索引文件需要存放的位置，我们设置为项目根目录 BASE_DIR 下的
+        whoosh_index 文件夹（在建立索引是会自动创建）。
+        HAYSTACK_SEARCH_RESULTS_PER_PAGE 指定如何对搜索结果分页，这里设置为每 10 项结果为一页。
+        HAYSTACK_SIGNAL_PROCESSOR 指定什么时候更新索引，这里我们使用 haystack.signals.RealtimeSignalProcessor，
+        作用是每当有文章更新时就更新索引。由于博客文章更新不会太频繁，因此实时更新没有问题。
+
+
+
+
+
+修改搜索引擎为中文分词
+    我们使用 Whoosh 作为搜索引擎，但在 django haystack 中为 Whoosh 指定的分词器是英文分词器，可能会使得搜索结果不理想，我们把这个分词器
+    替换成 jieba 中文分词器。从你安装的 haystack 中把 haystack/backends/whoosh_backends.py 文件拷贝到 blog/ 下，重命名为
+    whoosh_cn_backend.py（之前我们在 settings.py 中 的 HAYSTACK_CONNECTIONS 指定的就是这个文件），然后找到如下一行代码：
+    schema_fields[field_class.index_fieldname] = TEXT(stored=True, analyzer=StemmingAnalyzer(), field_boost=field_class.boost, sortable=True)
+    将其中的 analyzer 改为 ChineseAnalyzer，当然为了使用它，你需要在文件顶部引入：from jieba.analyse import ChineseAnalyzer。
+    建立索引文件
+    最后一步就是建立索引文件了，运行命令 python manage.py rebuild_index 就可以建立索引文件了
+
+
+错误：TypeError: __init__() missing 1 required positional argument: 'on_delete'
+    解决：在django2.0后，定义外键和一对一关系的时候需要加on_delete选项，此参数为了避免两个表里的数据不一致问题，不然会报错：
+    TypeError: __init__() missing 1 required positional argument: 'on_delete'
+    在ForeignKey后面都需要增加：post = models.ForeignKey('blog.Post',on_delete=models.CASCADE,)
+

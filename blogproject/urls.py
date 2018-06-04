@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url,include
 from django.contrib import admin
 from blog.feeds import AllPostsRessFeed
+from haystack import urls
 
 """
 我们这里导入了一个 include 函数，然后利用这个函数把 blog 应用下的 urls.py 文件包含了进来。此外 include 前还有一个 r''，这是一个空字符串。
@@ -27,5 +28,7 @@ urlpatterns = [
     url(r'',include('blog.urls')),
     url(r'',include('comments.urls')),
     url(r'^all/rss/$',AllPostsRessFeed(),name="rss"),
+    #搜索的视图函数和 URL 模式 django haystack 都已经帮我们写好了只需要项目的 urls.py 中包含它：
+    url(r'^search/$', include('haystack.urls')),
 
 ]

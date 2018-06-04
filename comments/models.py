@@ -16,7 +16,7 @@ class Comment(models.Model):
     """
     这个评论是关联到某篇文章（Post）的，由于一个评论只能属于一篇文章，一篇文章可以有多个评论，是一对多的关系，因此这里我们使用了 ForeignKey
     """
-    post = models.ForeignKey('blog.Post')
+    post = models.ForeignKey('blog.Post',on_delete=models.CASCADE,)
 
     def __str__(self):
         return self.text[:20]

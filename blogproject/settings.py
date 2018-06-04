@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'blog',
     'comments',
+    #引入haystack全文搜索
+    'haystack',
 ]
 
 MIDDLEWARE = [
@@ -140,3 +142,22 @@ STATIC_ROOT = os.path.join(BASE_DIR,'static')
 ###关闭debug和设置主机
 #DEBUG = False
 #ALLOWED_HOSTS = ['127.0.0.1', 'localhost ', 'blog.coolinux.com']
+
+
+#配置haystack全文搜索
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'blog.whoosh_cn_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    },
+}
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+#说明
+# HAYSTACK_CONNECTIONS 的 ENGINE 指定了 django haystack 使用的搜索引擎，这里我们使用了 blog.whoosh_cn_backend.WhooshEngine，
+# 虽然目前这个引擎还不存在，但我们接下来会创建它。PATH 指定了索引文件需要存放的位置，我们设置为项目根目录
+# BASE_DIR 下的 whoosh_index 文件夹（在建立索引是会自动创建）。
+# HAYSTACK_SEARCH_RESULTS_PER_PAGE 指定如何对搜索结果分页，这里设置为每 10 项结果为一页。
+# HAYSTACK_SIGNAL_PROCESSOR 指定什么时候更新索引，这里我们使用 haystack.signals.RealtimeSignalProcessor，
+# 作用是每当有文章更新时就更新索引。由于博客文章更新不会太频繁，因此实时更新没有问题。

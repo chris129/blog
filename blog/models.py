@@ -60,7 +60,7 @@ class Post(models.Model):
     https://docs.djangoproject.com/en/1.10/topics/db/models/#relationships
     """
 
-    category =models.ForeignKey(Category)
+    category =models.ForeignKey(Category,on_delete=models.CASCADE,)
     tags = models.ManyToManyField(Tag,blank=True)
     """
     文章作者，这里 User 是从 django.contrib.auth.models 导入的。
@@ -69,7 +69,7 @@ class Post(models.Model):
     因为我们规定一篇文章只能有一个作者，而一个作者可能会写多篇文章，因此这是一对多的关联关系，和 Category 类似。
     """
 
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User,on_delete=models.CASCADE,)
 
     def __str__(self):
         return self.title

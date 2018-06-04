@@ -6,6 +6,14 @@
 <html>
 <head>
     <title>Black &amp; White</title>
+    <!-- 增加高亮显示-->
+
+    <style>
+        span.highlighted {
+            color: red;
+        }
+    </style>
+
     <!-- meta -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -64,10 +72,10 @@
 {#                            <input type="search" placeholder="搜索" required>#}
 {#                            <button type="submit"><span class="ion-ios-search-strong"></span></button>#}
 {#                        </form>#}
-                        <!-- 搜索窗口重写用户输入了搜索关键词并点击了搜索按钮后，数据就被发送给了 Django 后台服务器。表单的 action
-                        属性的值为 {% url 'blog:search' %}（虽然我们还没有写这个视图函数），表明用户提交的结果将被发送给 blog 应用下 search 视图函数对应的 URL。-->
-
-                        <form role="search" method="get" id="searchform" action="{% url 'blog:search' %}">
+{#                        注意<!-- -->，不支持多行注释#}
+{#                        <!-- 搜索窗口重写用户输入了搜索关键词并点击了搜索按钮后，数据就被发送给了 Django 后台服务器。表单的 action属性的值为 {% url 'blog:search' %}（虽然我们还没有写这个视图函数），表明用户提交的结果将被发送给 blog 应用下 search 视图函数对应的 URL。-->#}
+{#                        <!-- <form role="search" method="get" id="searchform" action="{% url 'blog:search' %}">修改表单，让它提交数据到 django haystack 搜索视图对应的 URL-->#}
+                        <form role="search" method="get" id="searchform" action="{% url 'haystack_search' %}">
                             <input type="search" name="q" placeholder="搜索" required>
                             <button type="submit"><span class="ion-ios-search-strong"></span></button>
                         </form>
