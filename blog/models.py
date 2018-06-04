@@ -42,8 +42,6 @@ class Post(models.Model):
     # 文章正文，我们使用了 TextField。
     body = models.TextField()
     ##增加标签系统
-    # Tags = models.ManyToManyField('Tag')
-
     # 这两个列分别表示文章的创建时间和最后一次修改时间，存储时间的字段用 DateTimeField 类型。
     created_time = models.DateField()
     modified_time = models.DateField()
@@ -116,9 +114,6 @@ class Post(models.Model):
         super(Post, self).save(*args, **kwargs)
 
 
-    # ##增加tag类
-    # class Tag(models.Model):
-    #     name = models.CharField(max_length=100)
 
 
 

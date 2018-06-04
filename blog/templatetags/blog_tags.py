@@ -2,7 +2,7 @@
 #自定义模板标签代码写在 blog_tags.py 文件中。其实模板标签本质上就是一个 Python 函数，因此按照 Python 函数的思路来编写模板标签的代码就可以
 #定义好函数后，要按照 Django 的规定注册这个函数为模板标签
 
-from ..models import Post,Category
+from ..models import Post,Category,Tag
 from django.db.models.aggregates import Count
 
 
@@ -47,13 +47,17 @@ def get_category():
 
 #此外，annotate 方法不局限于用于本文提到的统计分类下的文章数，你也可以举一反三，只要是两个 model 类通过 ForeignKey 或者 ManyToMany
 #关联起来，那么就可以使用 annotate 方法来统计数量。比如下面这样一个标签系统
-
-#统计标签下的文章数
-from blog.models import Tag
-# Count 计算分类下的文章数，其接受的参数为需要计数的模型的名称
+# #统计标签下的文章数
+# from blog.models import Tag
+# # Count 计算分类下的文章数，其接受的参数为需要计数的模型的名称
 tag_list = Tag.objects.annotate(num_posts=Count('post'))
 
 
+@register.simple_tag
+def get_categories():
+    return Category.objects.annotate(num_posts=Count('post')).filter(num_posts__gt=0)
 
 
-
+@register.simple_tag
+def get_tags():
+    return Tag.objects.annotate(num_posts=Count('post')).filter(num_posts__gt=0)

@@ -352,3 +352,20 @@ class CategoryView(ListView):
     def get_queryset(self):
         cate = get_object_or_404(Category,pk=self.kwargs.get('pk'))
         return super(CategoryView,self).get_queryset().filter(category=cate)
+
+
+
+
+#标签云视图-显示某个标签下的文章列表
+#显示某个标签下的文章列表和我们之前做的点击分类后显示该分类下的文章列表是一样的。回顾一下显示分类下的文章列表时的做法，经典的 Django 三部曲。
+#首先是定义视图函数，然后编写模板文件，最后将视图函数和 URL 模式绑定。标签和分类是完全一样的步骤，因此稍微修改一下分类相关的代码就可以用于标签
+class TagView(ListView):
+    model = Post
+    template_name = 'blog/index.html'
+    context_object_name = 'post_list'
+
+    def get_queryset(self):
+        tag = get_object_or_404(Tag, pk=self.kwargs.get('pk'))
+        return super(TagView, self).get_queryset().filter(tags=tag)
+
+
