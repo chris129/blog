@@ -305,6 +305,14 @@ Django Haystack 全文检索与关键词高亮:
     schema_fields[field_class.index_fieldname] = TEXT(stored=True, analyzer=StemmingAnalyzer(), field_boost=field_class.boost, sortable=True)
     将其中的 analyzer 改为 ChineseAnalyzer，当然为了使用它，你需要在文件顶部引入：from jieba.analyse import ChineseAnalyzer。
     建立索引文件
+    数据模板的路径为
+        templates/search/indexes/youapp/\<model_name>_text.txt（例如 templates/search/indexes/blog/post_text.txt），其内容为：
+        templates/search/indexes/blog/post_text.txt
+        注意此文件需要手动建立，并且写入下面内容
+        {{ object.title }}
+        {{ object.body }}
+        这个数据模板的作用是对 Post.title、Post.body 这两个字段建立索引，当检索的时候会对这两个字段做全文检索匹配，
+        然后将匹配的结果排序后作为搜索结果返回。
     最后一步就是建立索引文件了，运行命令 python manage.py rebuild_index 就可以建立索引文件了
 
 
@@ -313,3 +321,7 @@ Django Haystack 全文检索与关键词高亮:
     TypeError: __init__() missing 1 required positional argument: 'on_delete'
     在ForeignKey后面都需要增加：post = models.ForeignKey('blog.Post',on_delete=models.CASCADE,)
 
+
+
+
+至此，测试流程全部跑一遍，其他功能需要进一步测试
